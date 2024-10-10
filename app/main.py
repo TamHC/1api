@@ -36,7 +36,7 @@ def reload_config():
 
 config_url = os.environ.get('config_url', False)
 if not config_url:
-    api_file_path = os.path.join(os.path.dirname(__file__), './api.yaml')
+    api_file_path = os.path.join(os.path.dirname(__file__), 'api.yaml')
     监视配置(api_file_path, reload_config)
 
 reload_config()
@@ -220,7 +220,7 @@ async def chat_completions(
     if first_chunk:
         async def generate_stream():
             async for chunk in genData:
-                yield chunk + "\r\n\r\n"
+                yield chunk + "\n\n"
                 if debug:
                     await asyncio.sleep(0.1)
                     logger.info(f"发送到客户端\r\n{chunk}")
@@ -263,8 +263,10 @@ app.add_middleware(
 @app.get("/reload_config")
 def reloadconfig():
     reload_config()
-    return f"已经执行刷新配置{time.time()}"
-
+    return JSONResponse({
+        "status": 0,
+        "msg": f"已经执行刷新配置"
+    })
 
 class GzipStaticFiles(StaticFiles):
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
@@ -293,6 +295,6 @@ if __name__ == "__main__":
         "__main__:app",
         host="0.0.0.0",
         port=8000,
-        # reload=True,
+        reload=True,
         # workers=1,
     )
